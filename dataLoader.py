@@ -1,3 +1,4 @@
+import pickle
 import re
 from nltk.corpus import wordnet
 import string
@@ -15,7 +16,10 @@ import torchtext
 import numpy as np
 
 from torch.utils.data.sampler import SubsetRandomSampler
-from torch.utils.data import DataLoader
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler
+
+
+import torch
 
 def clean_data(df):
     '''
@@ -72,10 +76,10 @@ def retrieve_data(data, glove, lowercase=True, stop_words=True):
     Tokenize for 1 Paragraph
     '''
     tokenized_data = []
-    paragraphs = data['text']
-
+    # labels = []
+    
     def tokenization():
-        for paragraph in paragraphs:
+        for paragraph, rating in zip(data['text'], data['rating']):
             if lowercase:
                 paragraph = paragraph.lower()
 
@@ -111,13 +115,19 @@ def retrieve_data(data, glove, lowercase=True, stop_words=True):
             elif len(tokenized_paragraph) > 256:
                 tokenized_paragraph = tokenized_paragraph[:256]
 
-            tokenized_data.append(tokenized_paragraph)
+            # ======
+            # tokenized_paragraph = torch.tensor(tokenized_paragraph)
+            # ======
+            if rating <= 3: rating = 0
+            else: rating = 1
+
+            tokenized_data.append((torch.tensor(tokenized_paragraph), rating))
+            # labels.append(rating)
 
     tokenization()
 
-    # Yang d.items() gimana buat?
-
-    return list(zip(tokenized_data, data['rating']))
+    return tokenized_data
+    # return list(zip(tokenized_data, labels))
 
 
 def split_data(data, val_size, test_size):
@@ -126,25 +136,37 @@ def split_data(data, val_size, test_size):
 
     train_data, val_temp = data[split_val:], data[:split_val]
     val_data, test_data = val_temp[split_test:], val_temp[:split_test]
-
+    
 
     return train_data, val_data, test_data
+
 
 
 def getDataLoader(data, batch_size, glove, val_size, test_size):
     # tokenization
     tokenized_data = retrieve_data(data=data, glove=glove)
     
-    #split data
+    # split data
     train_data, val_data, test_data = split_data(tokenized_data, val_size, test_size)
 
-    train_sampler = SubsetRandomSampler(train_data)   
-    val_sampler = SubsetRandomSampler(val_data)
-    test_sampler = SubsetRandomSampler(test_data)
 
-    train_loader = DataLoader(tokenized_data, batch_size=batch_size, sampler=train_sampler)
-    val_loader = DataLoader(tokenized_data, batch_size=batch_size, sampler=val_sampler)
-    test_loader = DataLoader(tokenized_data, batch_size=batch_size, sampler=test_sampler)
+    train_sampler = SubsetRandomSampler(range(len(train_data)))
+    val_sampler = SubsetRandomSampler(range(len(val_data)))
+    test_sampler = SubsetRandomSampler(range(len(test_data)))
+
+
+    train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
+    val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler)
+    test_loader = DataLoader(test_data, batch_size=batch_size, sampler=test_sampler)
+
+    
+    # train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    # val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True)
+    # test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+    
+
+    pickle.dump(train_loader, open('train_loader.pkl', 'wb'))
+    pickle.dump(val_loader, open('val_loader.pkl', 'wb'))
+    pickle.dump(test_loader, open('test_loader.pkl', 'wb'))
 
     return train_loader, val_loader, test_loader
-
