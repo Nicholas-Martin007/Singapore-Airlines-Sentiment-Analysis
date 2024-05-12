@@ -18,3 +18,8 @@ Reviews are classified into 2 classes: `0` (ratings 1, 2, or 3) and `1` (ratings
 - `Learning Rate` = 0.002
 - `Batch size` = 64
 
+
+# Results
+Epoch 12: Train_loss=0.4773, Train_Error=0.1850, Train_Acc=81.5000% || Val_Loss = 0.5012, Val_Error=0.2085, Val_Acc=79.1500%
+
+![Plot](result_of_100_epochs.png)

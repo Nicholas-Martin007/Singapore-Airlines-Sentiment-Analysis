@@ -44,6 +44,6 @@ if __name__ == "__main__":
 
 
     train_model = 1
-
+ 
     if train_model:
         train_sentiment_analysis(model, train_loader, val_loader, batch_size, lr=0.002, epochs=100)

@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim
@@ -29,6 +30,9 @@ def train_sentiment_analysis(model, train_loader, val_loader, batch_size, lr, ep
 
     start_time = time.time()
 
+
+    total_train_loss = []
+    total_val_loss = []
 
     for epoch in range(epochs):
         running_loss = 0
@@ -63,6 +67,8 @@ def train_sentiment_analysis(model, train_loader, val_loader, batch_size, lr, ep
 
         avg_train_error = running_error/len(train_loader.dataset)
         avg_train_loss = running_loss/len(train_loader)
+        total_train_loss.append(avg_train_loss)
+
         train_acc = correct/total
 
         model.eval()
@@ -94,11 +100,21 @@ def train_sentiment_analysis(model, train_loader, val_loader, batch_size, lr, ep
 
             avg_val_error = running_error/len(val_loader.dataset)
             avg_val_loss = running_loss/len(val_loader)
+            total_val_loss.append(avg_val_loss)
+
             val_acc = correct/total
 
         t = time.time() - start_time
         print(f"Epoch {epoch+1}: Train_loss={avg_train_loss:.4f}, Train_Error={avg_train_error:.4f}, Train_Acc={train_acc:.4%} || Val_Loss = {avg_val_loss:.4f}, Val_Error={avg_val_error:.4f}, Val_Acc={val_acc:.4%}")
         
-        if epoch+1 == 12:
-            model_path = model_name(model.name, batch_size, lr, epoch+1)
-            torch.save(model.state_dict(), model_path)
+        # if epoch+1 == 12:
+        #     model_path = model_name(model.name, batch_size, lr, epoch+1)
+        #     torch.save(model.state_dict(), model_path)
+
+    plt.plot(range(1, epochs + 1), total_train_loss, label='Train Loss')
+    plt.plot(range(1, epochs + 1), total_val_loss, label='Validation Loss')
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
