@@ -115,9 +115,6 @@ def retrieve_data(data, glove, lowercase=True, stop_words=True):
             elif len(tokenized_paragraph) > 256:
                 tokenized_paragraph = tokenized_paragraph[:256]
 
-            # ======
-            # tokenized_paragraph = torch.tensor(tokenized_paragraph)
-            # ======
             if rating <= 3: rating = 0
             else: rating = 1
 
@@ -157,13 +154,7 @@ def getDataLoader(data, batch_size, glove, val_size, test_size):
 
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler)
-    test_loader = DataLoader(test_data, batch_size=batch_size, sampler=test_sampler)
-
-    
-    # train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    # val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True)
-    # test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
-    
+    test_loader = DataLoader(test_data, batch_size=batch_size, sampler=test_sampler)    
 
     pickle.dump(train_loader, open('train_loader.pkl', 'wb'))
     pickle.dump(val_loader, open('val_loader.pkl', 'wb'))

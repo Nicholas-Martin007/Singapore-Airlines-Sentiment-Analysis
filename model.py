@@ -15,8 +15,8 @@ import torchtext
 class LSTMModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes):
         """
-        num_classes => outputs of the prediction which is ratings (1, 2, 3, 4, 5)?
-        LSTM input size = 300 because of glove embedding dimension?
+        num_classes => outputs of the prediction which is ratings
+        LSTM input size = 300 because of glove embedding dimension
 
         """
         super(LSTMModel, self).__init__()
